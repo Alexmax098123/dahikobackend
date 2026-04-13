@@ -9,10 +9,17 @@ const cors = require('cors');
 app.use(cors());
 app.use(express.json());
 
-// ✅ MongoDB connection (IMPORTANT)
-mongoose.connect(process.env.MONGO_URI)
+// ✅ MongoDB connection (Improved for Render)
+mongoose.connect(process.env.MONGO_URI, {
+  serverSelectionTimeoutMS: 5000 // Stop trying after 5 seconds instead of hanging
+})
 .then(() => console.log("MongoDB Connected ✅"))
-.catch(err => console.log("DB Error:", err));
+.catch(err => {
+  console.log("❌ DB CONNECTION ERROR:", err.message);
+  if (err.message.includes("whitelist")) {
+    console.log("👉 Reminder: Add Render's IP to MongoDB Atlas Whitelist.");
+  }
+});
 
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
